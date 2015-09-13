@@ -1,0 +1,7 @@
+%p#notice= notice
+%p
+  %strong Source code:
+  = @compiler.source_code
+= link_to 'Edit', edit_compiler_path(@compiler)
+|
+= link_to 'Back', compilers_path
