@@ -9,16 +9,18 @@ class Compiler < ActiveRecord::Base
   VARIABLE_TYPES = %w[int float double char string]
   OPERANDS = %w[+ - = * /]
   SYMBOLS = %w[< > ( ) { } ;]
+  INCLUDE = '#include'
 
 
   def validate_words(words)
 
     words_types = []
     words.split(/[ ,;\r\n(><)]+/).each do |word|
+
       if RESERVE_WORDS.include? word
         words_types << [word,RESERVE]
       elsif  OPERANDS.include? word
-        words_types << [word, OPERAND]
+        words_types << [word,OPERAND]
       elsif SYMBOLS.include? word
         words_types << [word, SYMBOL]
       elsif VARIABLE_TYPES.include? word
@@ -31,16 +33,25 @@ class Compiler < ActiveRecord::Base
   end
 
   def lexical_part
+
     words_types = validate_words(source_code)
     # puts words_types
+
+    puts "Words types:"
+    puts words_types
 
   end
 
   def validate_line(lines,index)
     return if lines[index].empty?
-    words = validate_words lines[index].gsub( "\n" , "")
-    if words[0][1] == VARIABLE
+    line = lines[index].gsub( "\n" , "")
+    words = validate_words line
+    first_word = words[0][1]
+
+    if first_word == VARIABLE
       variable_allocation
+    elsif words[0][0] == INCLUDE
+      puts 'caca' if line =~ /<[a-z]*(.h)?>\z/
     end
 
   end
@@ -54,8 +65,8 @@ class Compiler < ActiveRecord::Base
   end
 
 
-
   def variable_allocation
     puts 'pedo'
   end
+
 end
