@@ -3,8 +3,10 @@ class Compiler < ActiveRecord::Base
   OPERAND = 'operand'
   SYMBOL = 'symbol'
   OTHER = 'other'
-  RESERVE_WORDS = %w[main include return define if else ]
-  OPERANDS = %w[+ - =]
+  RESERVE_WORDS = %w[main #include return define]
+  METHODS = %w[if else for do while]
+  VARIABLE_TYPES = %w[int float double char string]
+  OPERANDS = %w[+ - = * /]
   SYMBOLS = %w[< > ( ) { } ;]
 
 
@@ -30,4 +32,11 @@ class Compiler < ActiveRecord::Base
 
   end
 
+  def validate_lines(lines)
+
+  end
+  def syntactic_part
+    lines = self.validate_lines(source_code.split("\n"))
+    puts lines
+  end
 end
