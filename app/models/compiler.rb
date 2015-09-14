@@ -2,6 +2,7 @@ class Compiler < ActiveRecord::Base
   RESERVE = 'reserve'
   OPERAND = 'operand'
   SYMBOL = 'symbol'
+  VARIABLE_TYPE = 'variable_type'
   OTHER = 'other'
   RESERVE_WORDS = %w[main #include return define]
   METHODS = %w[if else for do while]
@@ -11,16 +12,18 @@ class Compiler < ActiveRecord::Base
 
 
   def validate_words(words)
-    words_types = []
+    words_types = Hash.new
     words.each do |word|
       if RESERVE_WORDS.include? word
-        words_types << [word,RESERVE]
+        words_types[word] = RESERVE
       elsif  OPERANDS.include? word
-        words_types << [word, OPERAND]
+        words_types[word] = OPERAND
       elsif SYMBOLS.include? word
-        words_types << [word, SYMBOL]
+        words_types[word] = SYMBOL
+      elsif VARIABLE_TYPES.include? word
+        words_types[word] = VARIABLE_TYPE
       else
-        words_types << [word,OTHER]
+        words_types[word] = OTHER
       end
     end
     words_types
@@ -28,20 +31,30 @@ class Compiler < ActiveRecord::Base
 
   def lexical_part
     words_types = validate_words(source_code.split(/[ ,;\r\n(><)]+/))
-    # puts words_types
-
+    puts "Words types:"
+    puts words_types
   end
 
 
   def syntactic_part
-    lines = self.validate_lines(source_code.split("\n"))
-    lines.each do |line|
-      puts 'error' if validate_line line
+    lines = source_code.split(/\r\n/)
+    puts lines
+    lines.each_with_index do |line, index|
+      puts 'error' unless validate_line lines,index
+      puts line,index
     end
   end
 
-  def validate_line(line)
-    words = validate_words line
-  #   if words en [0] == include
+  def validate_line(line, index)
+    #puts line[index]
+    words = validate_words line[index].split(/[ ,;\r\n]+/)
+    # puts "Words:"
+    # puts words
+    # puts "Words value in 0:"
+    # puts words.values[0]
+    if words.keys[0] == "#include"
+      puts "going on"
+      true if words.keys[1] =~ /<[a-z]*(.h)?>\z/
+    end
   end
 end
