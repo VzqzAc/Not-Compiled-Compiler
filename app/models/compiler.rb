@@ -32,11 +32,16 @@ class Compiler < ActiveRecord::Base
 
   end
 
-  def validate_lines(lines)
 
-  end
   def syntactic_part
     lines = self.validate_lines(source_code.split("\n"))
-    puts lines
+    lines.each do |line|
+      puts 'error' if validate_line line
+    end
+  end
+
+  def validate_line(line)
+    words = validate_words line
+  #   if words en [0] == include
   end
 end
