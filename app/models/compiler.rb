@@ -4,7 +4,7 @@ class Compiler < ActiveRecord::Base
   SYMBOL = 'symbol'
   OTHER = 'other'
   VARIABLE = 'variable'
-  RESERVE_WORDS = %w[main #include return define]
+  RESERVE_WORDS = %w[main() #include return define]
   METHODS = %w[if else for do while]
   VARIABLE_TYPES = %w[int float double char string]
   OPERANDS = %w[+ - = * /]
@@ -49,6 +49,7 @@ class Compiler < ActiveRecord::Base
     return if lines[index].empty?
     line = lines[index].gsub( "\n" , "")
     words = validate_words line
+    #
     first_word = words[0][1]
 
     if first_word == VARIABLE
@@ -70,24 +71,42 @@ class Compiler < ActiveRecord::Base
 
   def variable_allocation(words)
     can_finish = false
-    valid = true
+    last = nil
     words.each do |word|
       case word[1]
         when VARIABLE
           can_finish = false
-          puts 'variable'
+          puts "variable #{word[0]}"
         when OTHER
+          if can_finish
+            puts 'error double variable declaration'
+            return false
+          end
+          unless word[0] =~ /([a-z]+|_+)+([0-9]*([a-z]*_*))*/
+            puts 'Error invalid var declaration'
+            return false
+          end
           can_finish = true
+          # check for valid variable name
           puts 'other'
+        when SYMBOL
+          puts "symbol #{word[0]}"
+          return true if word[0] == ';' and can_finish
+          can_finish = false
         when OPERAND
           can_finish = false
-          puts 'operna'
+          puts "operand #{word[0]}"
+        when RESERVE
+          if word[0] == 'main()' and last[0] == 'int'
+            puts 'Main function detected'
+          end
         else
           puts 'error'
           can_finish = false
       end
+      last = word
     end
-    can_finish
+    false
   end
 
 end
