@@ -13,10 +13,8 @@ class Compiler < ActiveRecord::Base
 
 
   def validate_words(words)
-
     words_types = []
-    words.split(/[ ,;\r\n(><)]+/).each do |word|
-
+    words.split(/[ ,\r\n(><)]+/).each do |word|
       if RESERVE_WORDS.include? word
         words_types << [word,RESERVE]
       elsif  OPERANDS.include? word
@@ -26,7 +24,12 @@ class Compiler < ActiveRecord::Base
       elsif VARIABLE_TYPES.include? word
         words_types << [word,VARIABLE]
       else
-        words_types << [word,OTHER]
+        if word.slice(";").nil?
+          words_types << [word,OTHER]
+        else
+          words_types << [word,OTHER]
+          words_types << [";",SYMBOL]
+        end
       end
     end
     words_types
@@ -49,9 +52,9 @@ class Compiler < ActiveRecord::Base
     first_word = words[0][1]
 
     if first_word == VARIABLE
-      variable_allocation
+      puts 'Varible asignation' if variable_allocation words
     elsif words[0][0] == INCLUDE
-      puts 'caca' if line =~ /<[a-z]*(.h)?>\z/
+      puts 'Inlcude added' if line =~ /<[a-z]*(.h)?>\z/
     end
 
   end
@@ -65,8 +68,26 @@ class Compiler < ActiveRecord::Base
   end
 
 
-  def variable_allocation
-    puts 'pedo'
+  def variable_allocation(words)
+    can_finish = false
+    valid = true
+    words.each do |word|
+      case word[1]
+        when VARIABLE
+          can_finish = false
+          puts 'variable'
+        when OTHER
+          can_finish = true
+          puts 'other'
+        when OPERAND
+          can_finish = false
+          puts 'operna'
+        else
+          puts 'error'
+          can_finish = false
+      end
+    end
+    can_finish
   end
 
 end
